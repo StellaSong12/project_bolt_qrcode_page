@@ -7,5 +7,5 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
-  base: '/project_bolt_qrcode_page/',
+  base: '/project_dev_tools/',
 });
