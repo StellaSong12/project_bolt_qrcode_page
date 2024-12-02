@@ -1,30 +1,40 @@
-import React from 'react';
-import { QrCode } from 'lucide-react';
+import React, { useState } from 'react';
 import { QRCodeGenerator } from './components/QRCodeGenerator';
+import { TextDiff } from './components/TextDiff';
+import { JsonFormatter } from './components/JsonFormatter';
+import { ToolSwitcher } from './components/ToolSwitcher';
+import { tools } from './config/tools';
 
 function App() {
+  const [currentTool, setCurrentTool] = useState(tools[0].id);
+
+  const CurrentToolComponent = () => {
+    switch (currentTool) {
+      case 'qr-generator':
+        return <QRCodeGenerator />;
+      case 'text-diff':
+        return <TextDiff />;
+      case 'json-formatter':
+        return <JsonFormatter />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-3">
-            <QrCode className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">QR Code Generator</h1>
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto">
+          <div className="px-4 sm:px-6 lg:px-8 py-4">
+            <ToolSwitcher
+              currentTool={currentTool}
+              onToolChange={setCurrentTool}
+            />
           </div>
         </div>
-      </header>
-      
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-        <QRCodeGenerator />
-      </main>
+      </div>
 
-      <footer className="bg-white border-t mt-8">
-        <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-          <p className="text-center text-gray-500 text-sm">
-            Generate QR codes instantly for any text or URL
-          </p>
-        </div>
-      </footer>
+      <CurrentToolComponent />
     </div>
   );
 }
