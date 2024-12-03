@@ -10,7 +10,7 @@ export interface DiffResult {
   isContext?: boolean;
   isCollapsible?: boolean;
   sectionId?: string;
-  hiddenLines?: number;
+  hiddenLines?: DiffResult[];
 }
 
 const CONTEXT_LINES = 3;
@@ -47,26 +47,27 @@ export function computeTextDiff(text1: string, text2: string): DiffResult[] {
 
   // Second pass: Add context and collapse unchanged sections
   const finalResult: DiffResult[] = [];
-  let lastChangedIndex = -1;
-  let equalLineCount = 0;
   let currentEqualSection: DiffResult[] = [];
+  let lastChangeIndex = -1;
 
-  result.forEach((diff, index) => {
+  for (let i = 0; i < result.length; i++) {
+    const diff = result[i];
+
     if (diff.type !== 'equal') {
-      // If we have accumulated equal lines, process them
+      // Process any accumulated equal lines before a change
       if (currentEqualSection.length > 0) {
         if (currentEqualSection.length > MIN_COLLAPSE_LINES) {
           // Add context before
           const contextBefore = currentEqualSection.slice(0, CONTEXT_LINES);
-          contextBefore.forEach(d => finalResult.push({ ...d, isContext: true }));
+          finalResult.push(...contextBefore.map(d => ({ ...d, isContext: true })));
 
           // Add collapsible section
-          const hiddenLines = currentEqualSection.length - (CONTEXT_LINES * 2);
-          if (hiddenLines > 0) {
-            const sectionId = `section-${index}`;
+          const hiddenLines = currentEqualSection.slice(CONTEXT_LINES, -CONTEXT_LINES);
+          if (hiddenLines.length > 0) {
+            const sectionId = `section-${i}`;
             finalResult.push({
               type: 'equal',
-              value: `${hiddenLines} identical lines hidden`,
+              value: `${hiddenLines.length} identical lines`,
               lineNumber: {},
               isCollapsible: true,
               sectionId,
@@ -77,34 +78,33 @@ export function computeTextDiff(text1: string, text2: string): DiffResult[] {
 
           // Add context after
           const contextAfter = currentEqualSection.slice(-CONTEXT_LINES);
-          contextAfter.forEach(d => finalResult.push({ ...d, isContext: true }));
+          finalResult.push(...contextAfter.map(d => ({ ...d, isContext: true })));
         } else {
           // If the section is small enough, include all lines
-          currentEqualSection.forEach(d => finalResult.push({ ...d, isContext: true }));
+          finalResult.push(...currentEqualSection.map(d => ({ ...d, isContext: true })));
         }
         currentEqualSection = [];
       }
 
       finalResult.push(diff);
-      lastChangedIndex = index;
-      equalLineCount = 0;
+      lastChangeIndex = finalResult.length - 1;
     } else {
       currentEqualSection.push(diff);
     }
-  });
+  }
 
   // Handle any remaining equal lines at the end
   if (currentEqualSection.length > 0) {
     if (currentEqualSection.length > MIN_COLLAPSE_LINES) {
       const contextBefore = currentEqualSection.slice(0, CONTEXT_LINES);
-      contextBefore.forEach(d => finalResult.push({ ...d, isContext: true }));
+      finalResult.push(...contextBefore.map(d => ({ ...d, isContext: true })));
 
-      const hiddenLines = currentEqualSection.length - (CONTEXT_LINES * 2);
-      if (hiddenLines > 0) {
+      const hiddenLines = currentEqualSection.slice(CONTEXT_LINES, -CONTEXT_LINES);
+      if (hiddenLines.length > 0) {
         const sectionId = 'section-end';
         finalResult.push({
           type: 'equal',
-          value: `${hiddenLines} identical lines hidden`,
+          value: `${hiddenLines.length} identical lines`,
           lineNumber: {},
           isCollapsible: true,
           sectionId,
@@ -114,9 +114,9 @@ export function computeTextDiff(text1: string, text2: string): DiffResult[] {
       }
 
       const contextAfter = currentEqualSection.slice(-CONTEXT_LINES);
-      contextAfter.forEach(d => finalResult.push({ ...d, isContext: true }));
+      finalResult.push(...contextAfter.map(d => ({ ...d, isContext: true })));
     } else {
-      currentEqualSection.forEach(d => finalResult.push({ ...d, isContext: true }));
+      finalResult.push(...currentEqualSection.map(d => ({ ...d, isContext: true })));
     }
   }
 

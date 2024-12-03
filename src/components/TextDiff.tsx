@@ -34,6 +34,61 @@ export function TextDiff() {
     });
   }, []);
 
+  const renderDiffLine = (diff: DiffResult, index: number | string) => {
+    if (diff.isCollapsible) {
+      const isExpanded = expandedSections.has(diff.sectionId!);
+      
+      return (
+        <tr key={index} className="bg-gray-50 hover:bg-gray-100">
+          <td className="w-12 text-right px-4 py-2 text-gray-500 select-none"></td>
+          <td className="w-12 text-right px-4 py-2 text-gray-500 select-none"></td>
+          <td className="px-4 py-2">
+            <button
+              onClick={() => toggleSection(diff.sectionId!)}
+              className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
+            >
+              {isExpanded ? (
+                <ChevronDown className="w-4 h-4 mr-1" />
+              ) : (
+                <ChevronRight className="w-4 h-4 mr-1" />
+              )}
+              {diff.value}
+            </button>
+          </td>
+        </tr>
+      );
+    }
+
+    const bgColor = diff.type === 'equal'
+      ? ''
+      : diff.type === 'add'
+        ? 'bg-green-50'
+        : 'bg-red-50';
+
+    const textColor = diff.type === 'equal'
+      ? 'text-gray-700'
+      : diff.type === 'add'
+        ? 'text-green-700'
+        : 'text-red-700';
+
+    return (
+      <tr key={index} className={bgColor}>
+        <td className="w-12 text-right px-4 py-2 text-gray-500 select-none font-mono text-xs">
+          {diff.lineNumber.old}
+        </td>
+        <td className="w-12 text-right px-4 py-2 text-gray-500 select-none font-mono text-xs">
+          {diff.lineNumber.new}
+        </td>
+        <td className={`px-4 py-2 font-mono text-sm whitespace-pre ${textColor}`}>
+          {diff.type === 'add' && '+ '}
+          {diff.type === 'remove' && '- '}
+          {diff.type === 'equal' && '  '}
+          {diff.value}
+        </td>
+      </tr>
+    );
+  };
+
   return (
     <>
       <header className="bg-white shadow">
@@ -91,57 +146,18 @@ export function TextDiff() {
                 <table className="w-full">
                   <tbody className="divide-y divide-gray-200">
                     {diffResult.map((diff, index) => {
-                      if (diff.isCollapsible) {
-                        const isExpanded = expandedSections.has(diff.sectionId!);
+                      if (diff.isCollapsible && diff.sectionId) {
+                        const isExpanded = expandedSections.has(diff.sectionId);
                         return (
-                          <tr key={index} className="bg-gray-50 hover:bg-gray-100">
-                            <td className="w-12 text-right px-4 py-2 text-gray-500 select-none"></td>
-                            <td className="w-12 text-right px-4 py-2 text-gray-500 select-none"></td>
-                            <td className="px-4 py-2">
-                              <button
-                                onClick={() => toggleSection(diff.sectionId!)}
-                                className="inline-flex items-center text-sm text-blue-600 hover:text-blue-800"
-                              >
-                                {isExpanded ? (
-                                  <ChevronDown className="w-4 h-4 mr-1" />
-                                ) : (
-                                  <ChevronRight className="w-4 h-4 mr-1" />
-                                )}
-                                {isExpanded ? 'Collapse' : diff.value}
-                              </button>
-                            </td>
-                          </tr>
+                          <React.Fragment key={index}>
+                            {renderDiffLine(diff, index)}
+                            {isExpanded && diff.hiddenLines?.map((hiddenDiff, hiddenIndex) => 
+                              renderDiffLine(hiddenDiff, `${index}-${hiddenIndex}`)
+                            )}
+                          </React.Fragment>
                         );
                       }
-
-                      const bgColor = diff.type === 'equal'
-                        ? ''
-                        : diff.type === 'add'
-                          ? 'bg-green-50'
-                          : 'bg-red-50';
-
-                      const textColor = diff.type === 'equal'
-                        ? 'text-gray-700'
-                        : diff.type === 'add'
-                          ? 'text-green-700'
-                          : 'text-red-700';
-
-                      return (
-                        <tr key={index} className={bgColor}>
-                          <td className="w-12 text-right px-4 py-2 text-gray-500 select-none font-mono text-xs">
-                            {diff.lineNumber.old}
-                          </td>
-                          <td className="w-12 text-right px-4 py-2 text-gray-500 select-none font-mono text-xs">
-                            {diff.lineNumber.new}
-                          </td>
-                          <td className={`px-4 py-2 font-mono text-sm whitespace-pre ${textColor}`}>
-                            {diff.type === 'add' && '+ '}
-                            {diff.type === 'remove' && '- '}
-                            {diff.type === 'equal' && '  '}
-                            {diff.value}
-                          </td>
-                        </tr>
-                      );
+                      return renderDiffLine(diff, index);
                     })}
                   </tbody>
                 </table>
