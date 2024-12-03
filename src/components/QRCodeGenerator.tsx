@@ -104,7 +104,7 @@ export function QRCodeGenerator() {
   };
 
   return (
-    <div className="relative flex min-h-screen bg-gray-50">
+    <div className="relative flex min-h-[calc(100vh-65px)]">
       <Sidebar
         isOpen={isSidebarOpen}
         isMobile={isMobile}

@@ -90,82 +90,71 @@ export function TextDiff() {
   };
 
   return (
-    <>
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center space-x-3">
-            <GitCompare className="w-8 h-8 text-blue-600" />
-            <h1 className="text-3xl font-bold text-gray-900">Text Diff</h1>
-          </div>
+    <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Original Text
+          </label>
+          <textarea
+            value={textDiff.text1}
+            onChange={handleText1Change}
+            className="w-full h-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono"
+            placeholder="Enter original text..."
+          />
         </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Original Text
-            </label>
-            <textarea
-              value={textDiff.text1}
-              onChange={handleText1Change}
-              className="w-full h-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono"
-              placeholder="Enter original text..."
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Modified Text
-            </label>
-            <textarea
-              value={textDiff.text2}
-              onChange={handleText2Change}
-              className="w-full h-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono"
-              placeholder="Enter modified text..."
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Modified Text
+          </label>
+          <textarea
+            value={textDiff.text2}
+            onChange={handleText2Change}
+            className="w-full h-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono"
+            placeholder="Enter modified text..."
+          />
         </div>
+      </div>
 
-        <div className="mt-4 flex justify-center">
-          <button
-            onClick={handleCompare}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            <GitCompare className="w-4 h-4 mr-2" />
-            Compare Texts
-          </button>
-        </div>
+      <div className="mt-4 flex justify-center">
+        <button
+          onClick={handleCompare}
+          className="inline-flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+        >
+          <GitCompare className="w-4 h-4 mr-2" />
+          Compare Texts
+        </button>
+      </div>
 
-        {diffResult.length > 0 && (
-          <div className="mt-8">
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="border-b border-gray-200 px-4 py-3">
-                <h2 className="text-lg font-semibold text-gray-900">Differences</h2>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <tbody className="divide-y divide-gray-200">
-                    {diffResult.map((diff, index) => {
-                      if (diff.isCollapsible && diff.sectionId) {
-                        const isExpanded = expandedSections.has(diff.sectionId);
-                        return (
-                          <React.Fragment key={index}>
-                            {renderDiffLine(diff, index)}
-                            {isExpanded && diff.hiddenLines?.map((hiddenDiff, hiddenIndex) => 
-                              renderDiffLine(hiddenDiff, `${index}-${hiddenIndex}`)
-                            )}
-                          </React.Fragment>
-                        );
-                      }
-                      return renderDiffLine(diff, index);
-                    })}
-                  </tbody>
-                </table>
-              </div>
+      {diffResult.length > 0 && (
+        <div className="mt-8">
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="border-b border-gray-200 px-4 py-3">
+              <h2 className="text-lg font-semibold text-gray-900">Differences</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <tbody className="divide-y divide-gray-200">
+                  {diffResult.map((diff, index) => {
+                    if (diff.isCollapsible && diff.sectionId) {
+                      const isExpanded = expandedSections.has(diff.sectionId);
+                      return (
+                        <React.Fragment key={index}>
+                          {renderDiffLine(diff, index)}
+                          {isExpanded && diff.hiddenLines?.map((hiddenDiff, hiddenIndex) => 
+                            renderDiffLine(hiddenDiff, `${index}-${hiddenIndex}`)
+                          )}
+                        </React.Fragment>
+                      );
+                    }
+                    return renderDiffLine(diff, index);
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
-        )}
-      </main>
-    </>
+        </div>
+      )}
+    </main>
   );
 }
