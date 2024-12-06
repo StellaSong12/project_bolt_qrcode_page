@@ -1,23 +1,34 @@
 import React, { useState, useCallback } from 'react';
 import { FileJson } from 'lucide-react';
 import JSON5 from 'json5';
-import { useToolState } from '../store/toolState';
+import { TextArea } from './shared/TextArea';
 import { JsonTreeView } from './JsonTreeView';
 
 export function JsonFormatter() {
-  const { jsonFormatter, setJsonFormatter } = useToolState();
+  const [input, setInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isJson5Mode, setIsJson5Mode] = useState(false);
   const [parsedData, setParsedData] = useState<any>(null);
 
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+      const newInput = e.target.value;
+      setInput(newInput);
+      setError(null);
+    },
+    []
+  );
+
   const formatJson = useCallback(() => {
+    if (!input.trim()) {
+      setError('Please enter some JSON to format');
+      setParsedData(null);
+      return;
+    }
+
     try {
       const parser = isJson5Mode ? JSON5.parse : JSON.parse;
-      const parsed = parser(jsonFormatter.input);
-      setJsonFormatter(
-        jsonFormatter.input,
-        JSON.stringify(parsed, null, 2)
-      );
+      const parsed = parser(input);
       setParsedData(parsed);
       setError(null);
     } catch (err) {
@@ -28,12 +39,7 @@ export function JsonFormatter() {
       }
       setParsedData(null);
     }
-  }, [jsonFormatter.input, isJson5Mode, setJsonFormatter]);
-
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setJsonFormatter(e.target.value, jsonFormatter.formatted);
-    setError(null);
-  }, [jsonFormatter.formatted, setJsonFormatter]);
+  }, [input, isJson5Mode]);
 
   return (
     <main className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
@@ -55,6 +61,7 @@ export function JsonFormatter() {
               onClick={formatJson}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
+              <FileJson className="w-4 h-4 mr-2" />
               Format
             </button>
           </div>
@@ -64,10 +71,9 @@ export function JsonFormatter() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Input JSON
               </label>
-              <textarea
-                value={jsonFormatter.input}
+              <TextArea
+                value={input}
                 onChange={handleInputChange}
-                className="w-full h-64 p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none font-mono"
                 placeholder={`Enter ${isJson5Mode ? 'JSON5' : 'JSON'} here...`}
               />
             </div>
@@ -79,9 +85,7 @@ export function JsonFormatter() {
                     <h3 className="text-sm font-medium text-red-800">
                       Error parsing {isJson5Mode ? 'JSON5' : 'JSON'}
                     </h3>
-                    <div className="mt-2 text-sm text-red-700">
-                      {error}
-                    </div>
+                    <div className="mt-2 text-sm text-red-700">{error}</div>
                   </div>
                 </div>
               </div>

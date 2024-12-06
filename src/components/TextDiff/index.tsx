@@ -1,30 +1,28 @@
 import React, { useState, useCallback } from 'react';
 import { GitCompare } from 'lucide-react';
-import { useToolState } from '../store/toolState';
-import { computeTextDiff } from '../utils/diffUtils';
-import { DiffViewer } from './DiffViewer';
-import { TextArea } from './shared/TextArea';
+import { computeTextDiff } from '../../utils/diffUtils';
+import { DiffViewer } from '../DiffViewer';
+import { TextArea } from './TextArea';
+import { useTextDiffStore } from './store';
 
 export function TextDiff() {
-  const { textDiff, setTextDiff } = useToolState();
+  const { text1, text2, setText1, setText2 } = useTextDiffStore();
   const [diffResult, setDiffResult] = useState<ReturnType<typeof computeTextDiff>>([]);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
 
   const handleText1Change = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newText1 = e.target.value;
-    setTextDiff(newText1, textDiff.text2);
-  }, [textDiff.text2, setTextDiff]);
+    setText1(e.target.value);
+  }, [setText1]);
 
   const handleText2Change = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const newText2 = e.target.value;
-    setTextDiff(textDiff.text1, newText2);
-  }, [textDiff.text1, setTextDiff]);
+    setText2(e.target.value);
+  }, [setText2]);
 
   const handleCompare = useCallback(() => {
-    const result = computeTextDiff(textDiff.text1, textDiff.text2);
+    const result = computeTextDiff(text1, text2);
     setDiffResult(result);
     setExpandedSections(new Set());
-  }, [textDiff.text1, textDiff.text2]);
+  }, [text1, text2]);
 
   const toggleSection = useCallback((sectionId: string) => {
     setExpandedSections(prev => {
@@ -46,7 +44,7 @@ export function TextDiff() {
             Original Text
           </label>
           <TextArea
-            value={textDiff.text1}
+            value={text1}
             onChange={handleText1Change}
             placeholder="Enter original text..."
           />
@@ -56,7 +54,7 @@ export function TextDiff() {
             Modified Text
           </label>
           <TextArea
-            value={textDiff.text2}
+            value={text2}
             onChange={handleText2Change}
             placeholder="Enter modified text..."
           />

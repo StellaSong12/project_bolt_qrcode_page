@@ -10,7 +10,10 @@ export function QRCodeGenerator() {
   const [text, setText] = useState('');
   const [qrCodeUrl, setQrCodeUrl] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [savedItems, setSavedItems] = useLocalStorage<QRCodeItem[]>('qrcodes', []);
+  const [savedItems, setSavedItems] = useLocalStorage<QRCodeItem[]>(
+    'qrcodes',
+    []
+  );
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const isMobile = useIsMobile();
 
@@ -90,7 +93,7 @@ export function QRCodeGenerator() {
   };
 
   const handleDelete = (id: string) => {
-    setSavedItems(savedItems.filter(item => item.id !== id));
+    setSavedItems(savedItems.filter((item) => item.id !== id));
   };
 
   const handleClearAll = () => {
@@ -119,7 +122,11 @@ export function QRCodeGenerator() {
         onClick={toggleSidebar}
         className="lg:hidden fixed bottom-6 right-6 z-50 bg-blue-600 text-white p-3 rounded-full shadow-xl hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-transform duration-200 hover:scale-105"
       >
-        {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        {isSidebarOpen ? (
+          <X className="w-6 h-6" />
+        ) : (
+          <Menu className="w-6 h-6" />
+        )}
       </button>
 
       {/* Main content area */}
@@ -127,7 +134,10 @@ export function QRCodeGenerator() {
         <div className="max-w-3xl mx-auto">
           <div className="bg-white rounded-xl shadow-md p-4 sm:p-6 space-y-4 sm:space-y-6">
             <div className="space-y-2">
-              <label htmlFor="text" className="block text-sm font-medium text-gray-700">
+              <label
+                htmlFor="text"
+                className="block text-sm font-medium text-gray-700"
+              >
                 Enter text or URL
               </label>
               <textarea
@@ -169,7 +179,11 @@ export function QRCodeGenerator() {
             {qrCodeUrl && (
               <div className="flex flex-col items-center space-y-4 pt-4">
                 <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-                  <img src={qrCodeUrl} alt="QR Code" className="w-48 h-48 sm:w-64 sm:h-64" />
+                  <img
+                    src={qrCodeUrl}
+                    alt="QR Code"
+                    className="w-48 h-48 sm:w-64 sm:h-64"
+                  />
                 </div>
                 <button
                   onClick={handleDownload}
